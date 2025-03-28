@@ -32,7 +32,7 @@ public class Account {
     private String accountNo;
 
     @Column(name = "bank_code", nullable = false)
-    private Integer bankCode;
+    private String bankCode;
 
     @Column(name = "account_name", nullable = false)
     private String accountName;
@@ -46,7 +46,7 @@ public class Account {
     public Account(AccountDetailDto dto, FinanceMember member) {
         this.financemember = member;
         this.accountNo = dto.getAccountNo();
-        this.bankCode = Integer.parseInt(dto.getBankCode());
+        this.bankCode = dto.getBankCode();
         this.accountName = dto.getAccountName();
         this.accountBalance = Long.parseLong(dto.getAccountBalance());
         this.accountType = Integer.parseInt(dto.getAccountTypeCode());

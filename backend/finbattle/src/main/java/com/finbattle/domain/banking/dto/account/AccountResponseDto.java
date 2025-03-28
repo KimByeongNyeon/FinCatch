@@ -11,7 +11,7 @@ public class AccountResponseDto {
     private final String accountNo;
 
     @Schema(description = "은행 코드", example = "090")
-    private final Integer bankCode;
+    private final String bankCode;
 
     @Schema(description = "계좌 이름", example = "수시입출금")
     private final String accountName;
