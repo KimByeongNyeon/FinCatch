@@ -1,7 +1,7 @@
 package com.finbattle.domain.quiz.repository;
 
 import com.finbattle.domain.quiz.model.EssayQuiz;
-import com.finbattle.global.common.model.enums.SubjectType;
+import com.finbattle.domain.quiz.model.SubjectType;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

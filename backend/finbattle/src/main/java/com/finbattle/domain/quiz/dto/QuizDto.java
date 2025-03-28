@@ -2,7 +2,7 @@ package com.finbattle.domain.quiz.dto;
 
 import com.finbattle.domain.quiz.model.Quiz;
 import com.finbattle.domain.quiz.model.QuizMode;
-import com.finbattle.global.common.model.enums.SubjectType;
+import com.finbattle.domain.quiz.model.SubjectType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

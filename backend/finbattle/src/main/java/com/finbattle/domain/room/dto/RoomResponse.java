@@ -1,7 +1,7 @@
 package com.finbattle.domain.room.dto;
 
+import com.finbattle.domain.quiz.model.SubjectType;
 import com.finbattle.domain.room.model.Room;
-import com.finbattle.global.common.model.enums.SubjectType;
 import java.time.LocalDateTime;
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.finbattle.global.common.model.enums;
+package com.finbattle.domain.quiz.model;
 
 public enum SubjectType {
     FIN_KNOWLEDGE,  //금융 지식

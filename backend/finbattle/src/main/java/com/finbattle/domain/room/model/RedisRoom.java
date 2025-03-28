@@ -1,8 +1,8 @@
 package com.finbattle.domain.room.model;
 
+import com.finbattle.domain.quiz.model.SubjectType;
 import com.finbattle.domain.room.dto.RedisRoomMember;
 import com.finbattle.domain.room.dto.RoomStatus;
-import com.finbattle.global.common.model.enums.SubjectType;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;

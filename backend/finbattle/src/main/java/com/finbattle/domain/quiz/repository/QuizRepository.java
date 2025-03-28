@@ -2,10 +2,9 @@ package com.finbattle.domain.quiz.repository;
 
 import com.finbattle.domain.quiz.model.Quiz;
 import com.finbattle.domain.quiz.model.QuizMode;
-import com.finbattle.global.common.model.enums.SubjectType;
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import com.finbattle.domain.quiz.model.SubjectType;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 

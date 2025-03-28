@@ -1,6 +1,5 @@
 package com.finbattle.domain.quiz.model;
 
-import com.finbattle.global.common.model.enums.SubjectType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
