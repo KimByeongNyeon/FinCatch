@@ -18,6 +18,7 @@ public class GameData {
 
     //퀴즈 번호
     Integer quizNum;
+    Integer currentQuizNum;
 
     //game 이용자들
     List<GameMemberStatus> gameMemberStatusList;
