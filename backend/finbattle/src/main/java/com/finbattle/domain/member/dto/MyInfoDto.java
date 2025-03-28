@@ -42,7 +42,6 @@ public class MyInfoDto {
         this.cats = Cats.stream()
             .map(CatDto::new)
             .collect(Collectors.toList());
-        ;
         this.mainCat = mainCat;
         this.exp = exp;
         this.point = point;

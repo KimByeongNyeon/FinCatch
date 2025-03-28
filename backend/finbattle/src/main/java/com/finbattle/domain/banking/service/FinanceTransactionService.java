@@ -33,7 +33,7 @@ public class FinanceTransactionService {
         CommonRequestHeader header) {
         return AllTransactionApiRequestDto.builder()
             .Header(header)
-            .accountNo(Long.parseLong(req.getAccountNo()))
+            .accountNo(req.getAccountNo())
             .startDate(req.getStartDate())
             .endDate(req.getEndDate())
             .transactionType(req.getTransactionType())
