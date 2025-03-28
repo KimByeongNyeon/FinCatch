@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { bankLogo } from "../../utils/BankLogo";
-import { AccountDetail, AllConsumeHistory } from "../../types/Accounts/Account";
+import { AccountDetail, AllConsumeHistory, ConsumeHistory } from "../../types/Accounts/Account";
 import { formatDateToInput } from "../../utils/formatDate";
 import { formatBalance, formataccountNo } from "../../utils/formatAccount";
 import { useAccount } from "../../hooks/useAccount";
@@ -24,7 +24,7 @@ const AccountLinkSection: React.FC<AccountLinkSectionProps> = ({ onAccountLink, 
   const [loading, setLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [consumeHistory, setConsumeHistory] = useState<AllConsumeHistory | null>(null);
-  const { fetchAccountDetail, fetchConsumeHistory } = useAccount();
+  const { fetchAccountDetail, fetchConsumeHistory, patchAccount } = useAccount();
 
   // 거래내역 필터 상태
   const [historyFilter, setHistoryFilter] = useState({
@@ -42,8 +42,8 @@ const AccountLinkSection: React.FC<AccountLinkSectionProps> = ({ onAccountLink, 
       setLoading(true);
       try {
         const response = await fetchAccountDetail(mainAccount.accountNo);
-        if (response?.data) {
-          setAccountDetail(response.data);
+        if (response?.isSuccess && response.result) {
+          setAccountDetail(response.result);
         }
       } catch (error) {
         console.error("계좌 상세 조회 에러:", error);
@@ -60,8 +60,28 @@ const AccountLinkSection: React.FC<AccountLinkSectionProps> = ({ onAccountLink, 
     setHistoryLoading(true);
     try {
       const response = await fetchConsumeHistory(mainAccount.accountNo, historyFilter.startDate, historyFilter.endDate, historyFilter.transactionType);
-      if (response?.data) {
-        setConsumeHistory(response.data);
+      console.log("거래내역 응답 (AccountLinkSection):", JSON.stringify(response, null, 2));
+
+      if (response?.isSuccess && response.result) {
+        console.log("거래내역 데이터 구조:", {
+          Header: response.result.Header,
+          REC: response.result.REC,
+          rawResponse: response,
+        });
+
+        // 응답 구조 검증
+        if (!response.result.REC?.list) {
+          console.error("거래내역 데이터 구조가 올바르지 않습니다:", response.result);
+          return;
+        }
+
+        // 거래내역 데이터 출력
+        console.log("거래내역 목록:", response.result.REC.list);
+        console.log("거래내역 총 개수:", response.result.REC.totalCount);
+
+        setConsumeHistory(response);
+      } else {
+        console.error("거래내역 조회 실패:", response?.message);
       }
     } catch (error) {
       console.error("거래내역 조회 에러:", error);
@@ -81,12 +101,29 @@ const AccountLinkSection: React.FC<AccountLinkSectionProps> = ({ onAccountLink, 
     if (name === "startDate" || name === "endDate") {
       value = value.replace(/-/g, "");
     }
-    setHistoryFilter((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // 필터 변경 시 거래내역 조회
-    fetchHistory();
+    setHistoryFilter((prev) => {
+      const newFilter = {
+        ...prev,
+        [name]: value,
+      };
+      // 필터 업데이트 후 즉시 조회
+      setTimeout(() => {
+        fetchHistory();
+      }, 0);
+      return newFilter;
+    });
+  };
+
+  const handleAccountLinkClick = async () => {
+    try {
+      setLoading(true);
+      await patchAccount();
+      onAccountLink();
+    } catch (error) {
+      console.error("계좌 목록 갱신 중 오류 발생:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,7 +135,7 @@ const AccountLinkSection: React.FC<AccountLinkSectionProps> = ({ onAccountLink, 
             <button onClick={handleDetailClick} className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-korean-pixel hover:bg-blue-100 transition-colors">
               {showDetail ? "상세정보 닫기" : "상세정보 보기"}
             </button>
-            <button onClick={onAccountLink} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-korean-pixel hover:bg-gray-200 transition-colors">
+            <button onClick={handleAccountLinkClick} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-korean-pixel hover:bg-gray-200 transition-colors">
               계좌 변경
             </button>
           </div>
@@ -225,18 +262,18 @@ const AccountLinkSection: React.FC<AccountLinkSectionProps> = ({ onAccountLink, 
                       <th className="px-6 py-3 text-right text-xs font-korean-pixel text-gray-500">잔액</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {consumeHistory.result.REC.list.map((transaction) => (
-                      <tr key={transaction.transcationUniqueNo}>
+                  <tbody>
+                    {consumeHistory.result.REC.list.map((transaction: ConsumeHistory) => (
+                      <tr key={transaction.transactionUniqueNo} className="border-b border-gray-100">
                         <td className="px-6 py-4 text-sm font-korean-pixel text-gray-500">
-                          {transaction.transcationDate} {transaction.transcationTime}
+                          {`${transaction.transactionDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3")} ${transaction.transactionTime.replace(/(\d{2})(\d{2})(\d{2})/, "$1:$2:$3")}`}
                         </td>
-                        <td className="px-6 py-4 text-sm font-korean-pixel">{transaction.transcationSummary}</td>
-                        <td className={`px-6 py-4 text-sm font-korean-pixel text-right ${transaction.transcationTypeName === "출금" ? "text-red-600" : "text-blue-600"}`}>
-                          {transaction.transcationTypeName === "출금" ? "-" : "+"}
-                          {formatBalance(transaction.transcationBalance)}원
+                        <td className="px-6 py-4 text-sm font-korean-pixel">{transaction.transactionSummary}</td>
+                        <td className={`px-6 py-4 text-sm font-korean-pixel text-right ${transaction.transactionTypeName === "출금" ? "text-red-600" : "text-blue-600"}`}>
+                          {transaction.transactionTypeName === "출금" ? "-" : "+"}
+                          {formatBalance(transaction.transactionBalance)}원
                         </td>
-                        <td className="px-6 py-4 text-sm font-korean-pixel text-right">{formatBalance(transaction.transcationAfterBalance)}원</td>
+                        <td className="px-6 py-4 text-sm font-korean-pixel text-right">{formatBalance(transaction.transactionAfterBalance)}원</td>
                       </tr>
                     ))}
                   </tbody>
@@ -251,7 +288,7 @@ const AccountLinkSection: React.FC<AccountLinkSectionProps> = ({ onAccountLink, 
         <div className="bg-gray-50 rounded-xl p-6 text-center">
           <p className="text-gray-600 mb-4 font-korean-pixel">{error || "아직 주 거래 통장이 설정되지 않았습니다"}</p>
           <button
-            onClick={onAccountLink}
+            onClick={handleAccountLinkClick}
             className="px-6 py-3 bg-gradient-to-r from-form-color to-button-color text-gray-700 rounded-lg font-korean-pixel hover:opacity-90 transition-all duration-300"
           >
             주 거래 통장 설정하기

@@ -27,9 +27,9 @@ export const useUserInfo = (autoFetch: boolean = true) => {
       const response = await fetchUserInfoApi();
       console.log("사용자 정보 응답:", response);
 
-      if (response.success && response.data) {
-        console.log("사용자 정보 설정:", response.data);
-        dispatch(setUser(response.data));
+      if (response.isSuccess && response.result) {
+        console.log("사용자 정보 설정:", response.result);
+        dispatch(setUser(response.result));
       } else {
         console.error("사용자 정보 요청 실패:", response.error);
         dispatch(setError(response.error));

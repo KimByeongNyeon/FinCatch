@@ -5,9 +5,15 @@ export const useChangeCat = () => {
   const { loading, error, execute: changeCatApi } = useApi<User>("/api/member/maincat", "PATCH");
 
   const changeCat = async (catId: number) => {
-    return await changeCatApi(undefined, {
+    const response = await changeCatApi(undefined, {
       params: { catId },
     });
+
+    return {
+      success: response.isSuccess,
+      data: response.result,
+      error: response.message,
+    };
   };
 
   return {

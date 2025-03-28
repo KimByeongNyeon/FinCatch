@@ -50,13 +50,14 @@ export const useApi = <T, P = void>(endpoint: string, method: "GET" | "PATCH" | 
         // 기존 API 응답 처리
         if (responseData.isSuccess) {
           setData(responseData.result);
-          return { success: true, data: responseData.result, message: responseData.message };
+          return responseData;
         } else {
           setError(responseData.message);
           return {
-            success: false,
-            error: responseData.message,
-            code: responseData.code,
+            isSuccess: false,
+            code: responseData.code || 500,
+            message: responseData.message,
+            result: null,
           };
         }
       } catch (err: any) {

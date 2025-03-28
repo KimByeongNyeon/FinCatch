@@ -69,7 +69,7 @@ export const useNicknameManager = () => {
     const checkResult = await checkNicknameAvailability(nickname);
     console.log("닉네임 체크 결과:", checkResult);
 
-    if (!checkResult.success) {
+    if (!checkResult.isSuccess) {
       return {
         success: false,
         message: checkResult.error || "닉네임 체크 중 오류가 발생했습니다.",
@@ -77,7 +77,7 @@ export const useNicknameManager = () => {
     }
 
     // API 응답의 result가 true면 닉네임이 이미 사용 중, false면 사용 가능
-    const isDuplicated = checkResult.data;
+    const isDuplicated = checkResult.result;
 
     if (isDuplicated) {
       return {
@@ -89,7 +89,7 @@ export const useNicknameManager = () => {
     // 2. 닉네임 변경 (사용 가능한 경우)
     const updateResult = await changeNickname(nickname);
 
-    if (!updateResult.success) {
+    if (!updateResult.isSuccess) {
       return {
         success: false,
         message: updateResult.error || "닉네임 변경 중 오류가 발생했습니다.",
@@ -99,7 +99,7 @@ export const useNicknameManager = () => {
     return {
       success: true,
       message: "닉네임이 성공적으로 변경되었습니다.",
-      user: updateResult.data,
+      user: updateResult.result,
     };
   };
 

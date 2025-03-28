@@ -34,9 +34,9 @@ export const useCharacterPurchase = () => {
       });
       console.log("API 응답:", response);
 
-      if (response.success && response.data) {
-        console.log("뽑은 캐릭터들:", response.data);
-        setPickedCharacters(response.data);
+      if (response.isSuccess && response.result) {
+        console.log("뽑은 캐릭터들:", response.result);
+        setPickedCharacters(response.result);
         // 뽑기 성공 후 유저 정보 갱신
         await fetchUserInfo();
 
@@ -45,7 +45,7 @@ export const useCharacterPurchase = () => {
           console.log("모달 표시 시도");
           setIsSpinning(false);
           setShowModal(true);
-          console.log("상태 업데이트 후:", { isSpinning: false, showModal: true, pickedCharacters: response.data });
+          console.log("상태 업데이트 후:", { isSpinning: false, showModal: true, pickedCharacters: response.result });
         }, 3000);
       } else {
         setIsSpinning(false);

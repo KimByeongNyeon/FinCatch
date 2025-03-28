@@ -84,8 +84,8 @@ export const useAnalyze = () => {
     const fetchWrongAnswers = async () => {
       try {
         const response = await readAllWrongAnswer();
-        if (response.success && response.data) {
-          const transformedCategories = transformWrongAnswersToCategories(response.data.allWrongAnswer);
+        if (response.isSuccess && response.result) {
+          const transformedCategories = transformWrongAnswersToCategories(response.result.allWrongAnswer);
           setCategories(transformedCategories);
         }
       } catch (error) {

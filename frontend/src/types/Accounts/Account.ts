@@ -28,36 +28,43 @@ export interface AccountDetail {
 }
 
 export interface ConsumeHistory {
-  transcationUniqueNo: string;
-  transcationDate: string;
-  transcationTime: string;
-  transcationType: string;
-  transcationTypeName: string;
-  transcationBalance: number;
-  transcationAfterBalance: number;
-  transcationSummary: string;
-  transcationMemo: string;
+  transactionUniqueNo: number;
+  transactionDate: string;
+  transactionTime: string;
+  transactionType: string;
+  transactionTypeName: string;
+  transactionAccountNo: string | null;
+  transactionBalance: number;
+  transactionAfterBalance: number;
+  transactionSummary: string;
+  transactionMemo: string | null;
+}
+
+export interface ConsumeHistoryREC {
+  totalCount: string;
+  list: ConsumeHistory[];
+}
+
+export interface ConsumeHistoryHeader {
+  responseCode: string;
+  responseMessage: string;
+  apiName: string;
+  transmissionDate: string;
+  transmissionTime: string;
+  institutionCode: string;
+  apiKey: string;
+  apiServiceCode: string;
+  institutionTransactionUniqueNo: string;
+}
+
+export interface ConsumeHistoryResponse {
+  Header: ConsumeHistoryHeader;
+  REC: ConsumeHistoryREC;
 }
 
 export interface AllConsumeHistory {
   isSuccess: boolean;
   code: number;
   message: string;
-  result: {
-    Header: {
-      responseCode: string;
-      responseMessage: string;
-      apiName: string;
-      transmissionDate: string;
-      transmissionTime: string;
-      institutionCode: string;
-      apiKey: string;
-      apiServiceCode: string;
-      institutionTransactionUniqueNo: string;
-    };
-    REC: {
-      totalCount: string;
-      list: ConsumeHistory[];
-    };
-  };
+  result: ConsumeHistoryResponse;
 }

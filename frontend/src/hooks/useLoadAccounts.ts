@@ -27,8 +27,8 @@ export const useLoadAccounts = (): UseLoadAccountsReturn => {
 
       // 실제 API 호출 코드 (주석 처리)
       const response = await fetchAllAccount();
-      if (response.success && response.data) {
-        setAccounts(response.data.accounts);
+      if (response.isSuccess && response.result) {
+        setAccounts(response.result.accounts);
       } else {
         setError("계좌 정보를 불러오는데 실패했습니다.");
       }

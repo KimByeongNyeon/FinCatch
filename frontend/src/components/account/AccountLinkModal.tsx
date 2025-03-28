@@ -15,18 +15,18 @@ const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onClose, on
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectLoading, setSelectLoading] = useState<boolean>(false);
   const [selectError, setSelectError] = useState<string | null>(null);
-  const { fetchAllAccount } = useAccount();
+  const { fetchAllAccount, changeAccount } = useAccount();
 
   const loadAccounts = useCallback(async () => {
     try {
       const response = await fetchAllAccount();
       console.log("API 응답:", response);
 
-      if (response?.data?.accounts) {
-        console.log("계좌 목록:", response.data.accounts);
-        setAccounts(response.data.accounts);
+      if (response?.isSuccess && response.result?.accounts) {
+        console.log("계좌 목록:", response.result.accounts);
+        setAccounts(response.result.accounts);
       } else {
-        console.log("계좌 데이터 구조:", response?.data);
+        console.log("계좌 데이터 구조:", response?.result);
         throw new Error("계좌 정보를 불러올 수 없습니다.");
       }
     } catch (error) {
@@ -49,14 +49,19 @@ const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onClose, on
     setSelectLoading(true);
     setSelectError(null);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      onLinkAccount(account);
-      onClose();
+      const response = await changeAccount(account.accountNo);
+      if (response?.isSuccess) {
+        onLinkAccount(account);
+        onClose();
+      } else {
+        throw new Error("주 거래 통장 설정에 실패했습니다.");
+      }
     } catch (error) {
       setSelectError("주 거래 통장 설정에 실패했습니다.");
       console.error("계좌 설정 에러:", error);
+    } finally {
+      setSelectLoading(false);
     }
-    setSelectLoading(false);
   };
 
   const formataccountNo = (accountNo: number) => {
