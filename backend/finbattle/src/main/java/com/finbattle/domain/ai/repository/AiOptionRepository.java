@@ -1,11 +1,10 @@
 package com.finbattle.domain.ai.repository;
 
+import com.finbattle.domain.ai.model.AiMultipleChoiceQuiz;
 import com.finbattle.domain.ai.model.AiOption;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
 public interface AiOptionRepository extends JpaRepository<AiOption, Long> {
-
-    // 필요 시 quizId로 보기 목록을 조회하는 메서드
-    // List<AiOption> findByMultipleChoiceQuizId(Long multipleChoiceQuizId);
-
+    List<AiOption> findByMultipleChoiceQuiz(AiMultipleChoiceQuiz multipleChoiceQuiz);
 }

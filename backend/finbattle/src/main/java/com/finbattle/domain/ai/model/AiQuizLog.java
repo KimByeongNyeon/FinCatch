@@ -5,18 +5,17 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "ai_quiz_log")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Entity
+@Table(name = "ai_quiz_log")
 public class AiQuizLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ai_quiz_log_id")
     private Long aiQuizLogId;
 
     @Column(name = "ai_quiz_id", nullable = false)
@@ -31,6 +30,7 @@ public class AiQuizLog {
     @Column(name = "is_correct", nullable = false)
     private boolean isCorrect;
 
+    @Builder.Default
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -1,5 +1,8 @@
 package com.finbattle.domain.ai.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.finbattle.domain.ai.dto.AiConsumptionQuizDto;
+import com.finbattle.domain.ai.dto.AiOptionDto;
 import com.finbattle.domain.ai.model.AiMultipleChoiceQuiz;
 import com.finbattle.domain.ai.model.AiOption;
 import com.finbattle.domain.ai.model.AiQuiz;
@@ -11,12 +14,15 @@ import com.finbattle.global.common.model.dto.BaseResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,22 +40,11 @@ public class AiConsumptionQuizService {
 
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
-    /**
-     * (1) 소비내역 + memberId → AI퀴즈 10개 생성 후, 생성된 AI퀴즈 ID 목록 반환
-     */
     public List<Long> createConsumptionQuiz(Long memberId, Map<String, Long> consumptionMap) {
-        // 1. GPT 프롬프트 생성
         String prompt = buildPrompt(consumptionMap);
-
-        // 2. GPT API 호출
         String gptAnswer = callOpenAi(prompt);
-
-        // 3. GPT 응답 파싱 → List<ParsedQuiz>
         List<ParsedQuiz> parsedList = parseGptAnswer(gptAnswer);
-
         List<Long> createdQuizIds = new ArrayList<>();
-
-        // 4. 각 ParsedQuiz 별로 DB 저장
         for (ParsedQuiz parsed : parsedList) {
             AiQuiz aiQuiz = AiQuiz.builder()
                     .memberId(memberId)
@@ -57,13 +52,11 @@ public class AiConsumptionQuizService {
                     .isDeleted(false)
                     .build();
             AiQuiz savedQuiz = aiQuizRepository.save(aiQuiz);
-
             AiMultipleChoiceQuiz multiple = AiMultipleChoiceQuiz.builder()
                     .aiQuiz(savedQuiz)
                     .question(parsed.question())
                     .build();
             AiMultipleChoiceQuiz savedMultiple = multipleChoiceQuizRepository.save(multiple);
-
             for (int i = 0; i < parsed.options().size(); i++) {
                 boolean isCorrect = (i == parsed.answerIndex());
                 AiOption option = AiOption.builder()
@@ -75,21 +68,14 @@ public class AiConsumptionQuizService {
             }
             createdQuizIds.add(savedQuiz.getAiQuizId());
         }
-
         return createdQuizIds;
     }
 
-    /**
-     * Prompt 생성
-     * 소비 내역을 기반으로 10개의 객관식 문제를 요청하는 프롬프트 작성
-     */
     private String buildPrompt(Map<String, Long> consumptionMap) {
         StringBuilder sb = new StringBuilder("사용자의 소비내역:\n");
         consumptionMap.forEach((category, amount) ->
                 sb.append("- ").append(category).append(": ").append(amount).append("원\n")
         );
-
-        // 전체 소비금액 및 각 항목 비율 계산
         long totalConsumption = consumptionMap.values().stream().mapToLong(Long::longValue).sum();
         sb.append("\n각 항목의 소비 비율:\n");
         consumptionMap.forEach((category, amount) -> {
@@ -97,7 +83,6 @@ public class AiConsumptionQuizService {
             sb.append("- ").append(category)
                     .append(": ").append(String.format("%.1f", ratio)).append("%\n");
         });
-
         sb.append("\n");
         sb.append("""
             위 소비내역과 비율 정보를 참고하여, 다음 두 유형의 문제를 적절히 섞은 금융 관련 맞춤형 문제 10개를 생성해 주세요.
@@ -113,59 +98,34 @@ public class AiConsumptionQuizService {
             
             위 두 유형이 고루 섞여 총 10개의 서로 다른 문제를 만들어 주세요.
             각 문제는 4개의 보기와 정답(0~3 중 인덱스)을 포함한 JSON 배열 형식으로 응답해 주세요.
-            
-            JSON 예시:
-            [
-              {"question": "당신의 소비 내역에서 가장 큰 소비 항목은 무엇입니까?", "options": ["식비", "주거", "교육", "기타"], "answerIndex": 1},
-              {"question": "담보 대출 시 담보 물건의 가치가 중요한 이유는 무엇입니까?", "options": ["대출 금액 결정", "이자율 결정", "리스크 관리", "모두 해당"], "answerIndex": 3},
-              ... (총 10개)
-            ]
             """);
-
         return sb.toString();
     }
-    /**
-     * GPT 호출 (기존 QuizAiService와 동일한 방식)
-     */
+
     private String callOpenAi(String prompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(openaiApiKey);
-
         Map<String, Object> message = Map.of("role", "user", "content", prompt);
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-3.5-turbo",
                 "messages", List.of(message),
                 "temperature", 0.7
         );
-
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<Map> response = restTemplate.exchange(
-                OPENAI_API_URL, HttpMethod.POST, entity, Map.class
-        );
-
+        ResponseEntity<Map> response = restTemplate.exchange(OPENAI_API_URL, HttpMethod.POST, entity, Map.class);
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
             throw new BusinessException(BaseResponseStatus.OPENAI_API_ERROR);
         }
-
         List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
         if (choices == null || choices.isEmpty()) {
             throw new BusinessException(BaseResponseStatus.AI_RESPONSE_INVALID);
         }
-
         String content = (String) ((Map<String, Object>) choices.get(0).get("message")).get("content");
         log.info("GPT 응답: {}", content);
         return content;
     }
 
-    /**
-     * GPT 응답(JSON) 파싱 → List<ParsedQuiz>
-     * 예시 응답 형식:
-     * [
-     *   {"question":"...","options":["...","...","...","..."],"answerIndex":1},
-     *   ... 9개
-     * ]
-     */
     private List<ParsedQuiz> parseGptAnswer(String gptAnswer) {
         try {
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
@@ -176,8 +136,20 @@ public class AiConsumptionQuizService {
         }
     }
 
-    /**
-     * 내부 DTO: GPT JSON → 자바 객체
-     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     record ParsedQuiz(String question, List<String> options, int answerIndex) {}
+
+    public List<AiConsumptionQuizDto> getLatestConsumptionQuizzes(Long memberId) {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+        List<AiQuiz> aiQuizzes = aiQuizRepository.findByMemberIdAndIsDeletedFalse(memberId, pageable);
+        return aiQuizzes.stream().map(aiQuiz -> {
+            AiMultipleChoiceQuiz multipleQuiz = multipleChoiceQuizRepository.findByAiQuiz(aiQuiz)
+                    .orElseThrow(() -> new BusinessException(BaseResponseStatus.QUIZ_NOT_FOUND));
+            List<AiOption> options = aiOptionRepository.findByMultipleChoiceQuiz(multipleQuiz);
+            List<AiOptionDto> optionDtos = options.stream()
+                    .map(opt -> new AiOptionDto(opt.getAiOptionId(), opt.getOptionText()))
+                    .collect(Collectors.toList());
+            return new AiConsumptionQuizDto(aiQuiz.getAiQuizId(), multipleQuiz.getQuestion(), optionDtos);
+        }).collect(Collectors.toList());
+    }
 }
