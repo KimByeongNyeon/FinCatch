@@ -31,10 +31,7 @@ public class FinanceFacadeService implements FinanceService {
 
     @Override
     public FindAllAccountResponseDto findAllAccount(Long memberId) {
-        // ✅ 1. 회원을 "무조건 확보" (없으면 금융망 등록까지 완료)
         FinanceMember member = financeMemberService.loadOrRegister(memberId, financeKey);
-
-        log.info("✅ 금융회원 확보 완료: {}", member.getFinanceKey());
 
         List<AccountResponseDto> lists = financeAccountService.findAllAccount(financeKey, member);
         FindAllAccountResponseDto res = new FindAllAccountResponseDto();
@@ -43,6 +40,19 @@ public class FinanceFacadeService implements FinanceService {
         if (member.getMainaccount().isEmpty() && !lists.isEmpty()) {
             member.changeMainAccount(lists.get(0).getAccountNo());
         }
+
+        res.setMainAccount(member.getMainaccount());
+        res.setAccounts(lists);
+        return res;
+    }
+
+    @Override
+    public FindAllAccountResponseDto updateAllAccount(Long memberId) {
+        FinanceMember member = financeMemberService.loadOrRegister(memberId, financeKey);
+
+        List<AccountResponseDto> lists = financeAccountService.updateAccountList(financeKey,
+            member);
+        FindAllAccountResponseDto res = new FindAllAccountResponseDto();
 
         res.setMainAccount(member.getMainaccount());
         res.setAccounts(lists);

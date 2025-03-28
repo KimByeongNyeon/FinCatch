@@ -11,11 +11,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import net.minidev.json.annotate.JsonIgnore;
 
 @Entity
 @NoArgsConstructor
 @Getter
+@ToString
 public class Account {
 
     @Id

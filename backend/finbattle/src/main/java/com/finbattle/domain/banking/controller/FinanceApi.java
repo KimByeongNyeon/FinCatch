@@ -30,6 +30,16 @@ public interface FinanceApi {
         @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser detail);
 
     @Operation(
+        summary = "모든 금융 계좌 갱신",
+        description = "로그인한 사용자의 금융망 계좌 정보를 모두 최신화합니다."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "계좌 동기화 성공")
+    })
+    ResponseEntity<BaseResponse<FindAllAccountResponseDto>> updateAllAccount(
+        @AuthenticationPrincipal AuthenticatedUser detail);
+
+    @Operation(
         summary = "금융 계좌 상세 조회",
         description = "로그인한 사용자의 금융망 특정 계좌의 상세 정보를 조회합니다."
     )

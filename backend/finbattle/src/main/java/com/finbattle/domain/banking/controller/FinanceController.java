@@ -34,6 +34,16 @@ public class FinanceController implements FinanceApi {
         return ResponseEntity.ok(new BaseResponse<>(res));
     }
 
+    @PatchMapping("/account/all")
+    @Override
+    // 1. 금융망 유저 정보 조회
+    public ResponseEntity<BaseResponse<FindAllAccountResponseDto>> updateAllAccount(
+        @AuthenticationPrincipal AuthenticatedUser detail) {
+
+        FindAllAccountResponseDto res = financeService.updateAllAccount(detail.getMemberId());
+        return ResponseEntity.ok(new BaseResponse<>(res));
+    }
+
     @PostMapping("/account/detail")
     @Override
     public ResponseEntity<BaseResponse<AccountDetailDto>> findAccountDetail(

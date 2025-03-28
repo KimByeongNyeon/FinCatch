@@ -13,6 +13,8 @@ public interface FinanceService {
 
     void changeAccount(Long memberId, String accountNo);
 
+    FindAllAccountResponseDto updateAllAccount(Long memberId);
+
     LoadAllTransactionResponseDto loadAllTransaction(Long memberId,
         LoadAllTransactionRequestDto dto);
 }
