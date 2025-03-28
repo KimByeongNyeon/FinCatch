@@ -1,5 +1,5 @@
 package com.finbattle.domain.banking.dto.account;
 
-public record AccountRequestDto(Long accountNo) {
+public record AccountRequestDto(String accountNo) {
 
 }

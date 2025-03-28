@@ -9,9 +9,9 @@ public interface FinanceService {
 
     FindAllAccountResponseDto findAllAccount(Long memberId);
 
-    AccountDetailDto findAccountByNo(Long memberId, Long accountNo);
+    AccountDetailDto findAccountByNo(Long memberId, String accountNo);
 
-    void changeAccount(Long memberId, Long accountNo);
+    void changeAccount(Long memberId, String accountNo);
 
     LoadAllTransactionResponseDto loadAllTransaction(Long memberId,
         LoadAllTransactionRequestDto dto);

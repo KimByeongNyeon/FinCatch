@@ -9,5 +9,5 @@ public interface FinanceAccountRepository extends JpaRepository<Account, Long> {
 
     List<Account> findByFinancemember_MemberId(Long memberId);
 
-    Optional<Account> findByAccountNo(Long accountNo);
+    Optional<Account> findByAccountNo(String accountNo);
 }

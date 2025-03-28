@@ -40,7 +40,7 @@ public class FinanceFacadeService implements FinanceService {
         FindAllAccountResponseDto res = new FindAllAccountResponseDto();
 
         // ✅ 3. 메인 계좌 설정
-        if (member.getMainaccount() == 0L && !lists.isEmpty()) {
+        if (member.getMainaccount().isEmpty() && !lists.isEmpty()) {
             member.changeMainAccount(lists.get(0).getAccountNo());
         }
 
@@ -50,13 +50,13 @@ public class FinanceFacadeService implements FinanceService {
     }
 
     @Override
-    public AccountDetailDto findAccountByNo(Long memberId, Long accountNo) {
+    public AccountDetailDto findAccountByNo(Long memberId, String accountNo) {
         FinanceMember member = financeMemberService.loadOrRegister(memberId, financeKey);
         return financeAccountService.findAccountByNo(accountNo, financeKey, member);
     }
 
     @Override
-    public void changeAccount(Long memberId, Long accountNo) {
+    public void changeAccount(Long memberId, String accountNo) {
         FinanceMember member = financeMemberService.loadOrRegister(memberId, financeKey);
         if (financeAccountService.validAccountNo(accountNo, member)) {
             financeMemberService.changeMainAccount(member, accountNo);

@@ -14,7 +14,7 @@ public class FindAllAccountResponseDto {
         description = "대표 계좌 번호",
         example = "3333026965506"
     )
-    private Long mainAccount;
+    private String mainAccount;
 
     @Schema(
         description = "사용자의 전체 계좌 리스트"

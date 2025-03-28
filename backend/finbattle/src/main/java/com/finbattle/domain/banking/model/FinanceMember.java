@@ -39,7 +39,7 @@ public class FinanceMember {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "main_account")
-    private Long Mainaccount = 0L;
+    private String Mainaccount = "";
 
     @OneToMany(mappedBy = "financemember", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Account> accounts = new ArrayList<>();
@@ -49,7 +49,7 @@ public class FinanceMember {
         this.financeKey = dto.getUserKey();
     }
 
-    public void changeMainAccount(Long num) {
-        this.Mainaccount = num;
+    public void changeMainAccount(String accountNo) {
+        this.Mainaccount = accountNo;
     }
 }

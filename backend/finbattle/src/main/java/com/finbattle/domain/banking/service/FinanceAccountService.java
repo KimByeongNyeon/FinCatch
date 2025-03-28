@@ -42,7 +42,7 @@ public class FinanceAccountService {
         return result;
     }
 
-    public boolean validAccountNo(Long accountNo, FinanceMember member) {
+    public boolean validAccountNo(String accountNo, FinanceMember member) {
         List<Account> accounts = financeAccountRepository.findByFinancemember_MemberId(
             member.getMemberId());
 
@@ -54,14 +54,15 @@ public class FinanceAccountService {
         return false;
     }
 
-    public AccountDetailDto findAccountByNo(Long accountNo, String financeKey,
+    public AccountDetailDto findAccountByNo(String accountNo, String financeKey,
         FinanceMember member) {
         AccountDetailDto account = findAccountApi(accountNo, financeKey, member).getREC();
         if (account.getAccountNo().isEmpty()) {
             throw new BusinessException(ACCOUNT_NOT_FOUND);
         }
         long balance = Long.parseLong(account.getAccountBalance());
-        Account myaccount = financeAccountRepository.findByAccountNo(accountNo).orElse(null);
+        Account myaccount = financeAccountRepository.findByAccountNo(accountNo)
+            .orElse(null);
         if (balance != Objects.requireNonNull(myaccount).getAccountBalance()) {
             myaccount.changeAccountBalance(balance);
             financeAccountRepository.save(myaccount);
@@ -87,7 +88,7 @@ public class FinanceAccountService {
         return accounts;
     }
 
-    private FindByNoResponseDto findAccountApi(Long accountNo,
+    private FindByNoResponseDto findAccountApi(String accountNo,
         String financeKey, FinanceMember member) {
         String apiPath = "inquireDemandDepositAccount";
         CommonRequestHeader header = new CommonRequestHeader(apiPath, financeKey,

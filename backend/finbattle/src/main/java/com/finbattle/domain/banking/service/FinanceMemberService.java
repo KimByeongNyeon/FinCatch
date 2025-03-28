@@ -37,7 +37,7 @@ public class FinanceMemberService {
             });
     }
 
-    public void changeMainAccount(FinanceMember member, Long accountNo) {
+    public void changeMainAccount(FinanceMember member, String accountNo) {
         member.changeMainAccount(accountNo);
         financeMemberRepository.save(member);
     }

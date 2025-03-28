@@ -8,7 +8,7 @@ import lombok.Getter;
 public class AccountResponseDto {
 
     @Schema(description = "계좌 번호", example = "3333026965506")
-    private final Long accountNo;
+    private final String accountNo;
 
     @Schema(description = "은행 코드", example = "090")
     private final Integer bankCode;
