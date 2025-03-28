@@ -46,7 +46,7 @@ public class MyInfoDto {
         this.mainCat = mainCat;
         this.exp = exp;
         this.point = point;
-        if (financeMember.getFinanceKey().isEmpty()) {
+        if (financeMember == null) {
             this.main_account = 0L;
         } else {
             this.main_account = financeMember.getMainaccount();
