@@ -53,6 +53,7 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests((auth) -> auth
                 .requestMatchers(PublicEndpoint.getAll().toArray(new String[0])).permitAll()
+                .requestMatchers("/ws/firechat/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)

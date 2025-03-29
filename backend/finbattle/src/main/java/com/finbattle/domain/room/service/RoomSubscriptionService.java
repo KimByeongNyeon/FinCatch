@@ -135,12 +135,18 @@ public class RoomSubscriptionService {
     /**
      * 유저 강퇴 처리 후 Redis 저장 및 이벤트 발행
      */
-    public void kickUser(Long roomId, Long targetUserId) {
+    public void kickUser(Long roomId, Long hostId, Long targetUserId) {
         RedisRoom redisRoom = getRedisRoom(roomId);
         if (redisRoom == null) {
             // ✅ MessageType.KICK_FAIL 사용
             publishEvent(MessageType.KICK_FAIL, roomId, new FailResponse("방이 존재하지 않습니다."));
             throw new IllegalStateException("방이 존재하지 않습니다.");
+        }
+
+        if (hostId != redisRoom.getHost().getMemberId()) {
+            publishEvent(MessageType.KICK_FAIL, roomId,
+                new FailResponse("방장 권한을 가진 사람만 강퇴할 수 있습니다."));
+            throw new IllegalStateException("방장 권한을 가진 사람만 강퇴할 수 있습니다.");
         }
 
         List<RedisRoomMember> members = redisRoom.getMembers();

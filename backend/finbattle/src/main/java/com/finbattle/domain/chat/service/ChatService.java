@@ -19,9 +19,9 @@ public class ChatService {
     /**
      * 채팅 메시지를 DB에 저장하고, Redis 채널("chat")에 발행
      */
-    public void processChatMessage(ChatMessage message) {
+    public void processChatMessage(ChatMessage message, Long memberId) {
         // DB 저장
-        ChatLog log = new ChatLog(message.getRoomId(), message.getSender(), message.getContent());
+        ChatLog log = new ChatLog(message.getRoomId(), memberId, message.getContent());
         chatLogRepository.save(log);
         // Redis에 JSON 형태로 발행
         try {

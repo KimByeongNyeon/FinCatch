@@ -60,9 +60,9 @@ public class RoomService {
     private final QuizOptionRepository quizOptionRepository;
 
     // 방 생성
-    public RoomResponse createRoom(RoomCreateRequest request) {
+    public RoomResponse createRoom(Long memberId, RoomCreateRequest request) {
         // (1) Member 조회
-        Member member = memberRepository.findById(request.getMemberId())
+        Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         // (2) Room 엔티티 생성

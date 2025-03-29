@@ -1,5 +1,6 @@
 package com.finbattle.domain.room.controller;
 
+import com.finbattle.domain.oauth.dto.AuthenticatedUser;
 import com.finbattle.domain.room.dto.RoomCreateRequest;
 import com.finbattle.domain.room.dto.RoomResponse;
 import com.finbattle.domain.room.dto.RoomType;
@@ -12,6 +13,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,8 +39,9 @@ public class RoomController {
     @Operation(summary = "방 생성하기", description = "방 생성 api")
     @PostMapping
     public ResponseEntity<BaseResponse<RoomResponse>> createRoom(
+        @AuthenticationPrincipal AuthenticatedUser detail,
         @RequestBody RoomCreateRequest request) {
-        RoomResponse response = roomService.createRoom(request);
+        RoomResponse response = roomService.createRoom(detail.getMemberId(), request);
         roomSubscriptionService.createRoomSubscription(response);
         return ResponseEntity.ok(new BaseResponse<>(response));
     }
@@ -94,10 +97,10 @@ public class RoomController {
 
 
     @Operation(summary = "게임 시작하기", description = "room 게임 시작 api")
-    @PutMapping("/start/{roomId}/{memberId}")
+    @PutMapping("/start/{roomId}")
     public ResponseEntity<BaseResponse<Void>> readyRoom(@PathVariable Long roomId,
-        @PathVariable Long memberId) {
-        roomService.startRoom(roomId, memberId);
+        @AuthenticationPrincipal AuthenticatedUser detail) {
+        roomService.startRoom(roomId, detail.getMemberId());
         return ResponseEntity.ok(new BaseResponse<>());
     }
 
@@ -117,11 +120,11 @@ public class RoomController {
      * 방 참가 요청 처리 (RDB에 저장하지 않고 Redis에서만 관리)
      */
     @Operation(summary = "대기방 들어가기", description = "대기방 참가 api")
-    @PostMapping("/room/{roomId}/join/{userId}")
+    @PostMapping("/room/{roomId}/join")
     public ResponseEntity<BaseResponse<Void>> joinRoom(@PathVariable Long roomId,
-        @PathVariable Long userId) {
-        log.info("User {} joining room {}", userId, roomId);
-        roomSubscriptionService.joinRoom(roomId, userId);
+        @AuthenticationPrincipal AuthenticatedUser detail) {
+        log.info("User {} joining room {}", detail.getMemberId(), roomId);
+        roomSubscriptionService.joinRoom(roomId, detail.getMemberId());
         return ResponseEntity.ok(new BaseResponse<>());
     }
 
@@ -140,11 +143,11 @@ public class RoomController {
      * 유저가 방을 나갈 때 처리 (방장이면 위임 or 방 해체)
      */
     @Operation(summary = "대기방에서 나가기", description = "대기방에서 나가기 api")
-    @PostMapping("/room/{roomId}/leave/{userId}")
+    @PostMapping("/room/{roomId}/leave")
     public ResponseEntity<BaseResponse<Void>> leaveRoom(@PathVariable Long roomId,
-        @PathVariable Long userId) {
-        log.info("User {} leaving room {}", userId, roomId);
-        roomSubscriptionService.leaveRoom(roomId, userId);
+        @AuthenticationPrincipal AuthenticatedUser detail) {
+        log.info("User {} leaving room {}", detail.getMemberId(), roomId);
+        roomSubscriptionService.leaveRoom(roomId, detail.getMemberId());
         return ResponseEntity.ok(new BaseResponse<>());
     }
 
@@ -152,12 +155,13 @@ public class RoomController {
      * 강퇴(kick) 요청 처리
      */
     @Operation(summary = "대기방에서 강퇴 시키기", description = "대기방 강퇴 api")
-    @PostMapping("/room/{roomId}/kick/{hostId}/{targetUserId}")
+    @PostMapping("/room/{roomId}/kick/{targetUserId}")
     public ResponseEntity<BaseResponse<Void>> kickUser(@PathVariable Long roomId,
-        @PathVariable Long hostId,
+        @AuthenticationPrincipal AuthenticatedUser detail,
         @PathVariable Long targetUserId) {
-        log.info("host {} Kicking user {} from room {}", hostId, targetUserId, roomId);
-        roomSubscriptionService.kickUser(roomId, targetUserId);
+        log.info("host {} Kicking user {} from room {}", detail.getMemberId(), targetUserId,
+            roomId);
+        roomSubscriptionService.kickUser(roomId, detail.getMemberId(), targetUserId);
         return ResponseEntity.ok(new BaseResponse<>());
     }
 
@@ -165,11 +169,11 @@ public class RoomController {
      * 준비(ready) 요청 처리
      */
     @Operation(summary = "대기방 준비 상태로 변환", description = "대기방 준비 상태로 변환 api")
-    @PostMapping("/room/{roomId}/ready/{userId}")
+    @PostMapping("/room/{roomId}/ready")
     public ResponseEntity<BaseResponse<Void>> setReady(@PathVariable Long roomId,
-        @PathVariable Long userId) {
-        log.info("User {} set READY in room {}", userId, roomId);
-        roomSubscriptionService.setUserReady(roomId, userId);
+        @AuthenticationPrincipal AuthenticatedUser detail) {
+        log.info("User {} set READY in room {}", detail.getMemberId(), roomId);
+        roomSubscriptionService.setUserReady(roomId, detail.getMemberId());
         return ResponseEntity.ok(new BaseResponse<>());
     }
 
@@ -177,11 +181,11 @@ public class RoomController {
      * 준비 해제
      */
     @Operation(summary = "대기방 준비 해제", description = "대기방 준비 해제 api")
-    @PostMapping("/room/{roomId}/unready/{userId}")
+    @PostMapping("/room/{roomId}/unready")
     public ResponseEntity<BaseResponse<Void>> setUnready(@PathVariable Long roomId,
-        @PathVariable Long userId) {
-        log.info("User {} set UNREADY in room {}", userId, roomId);
-        roomSubscriptionService.setUserUnReady(roomId, userId);
+        @AuthenticationPrincipal AuthenticatedUser detail) {
+        log.info("User {} set UNREADY in room {}", detail.getMemberId(), roomId);
+        roomSubscriptionService.setUserUnReady(roomId, detail.getMemberId());
         return ResponseEntity.ok(new BaseResponse<>());
     }
 }

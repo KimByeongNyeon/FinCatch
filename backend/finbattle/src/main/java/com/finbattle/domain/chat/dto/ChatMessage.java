@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatMessage {
-    private String sender;   // 메시지 보낸 사람
+public class ChatMessage { // 메시지 보낸 사람
+
     private String content;  // 메시지 내용
     private String roomId;   // 채팅방 ID
 }
