@@ -16,6 +16,8 @@ app:
   clientUrl: http://localhost:3210
 
 logging:
+  file:
+    name: logs/app.log
   level:
     org.springframework.security: DEBUG  # Security 관련 로그 줄이기
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG  # 요청 로그 줄이기
@@ -25,4 +27,4 @@ logging:
     org.apache.tomcat: WARN  # Tomcat 관련 상세 로그 줄이기
 
   pattern:
-    console: "%clr(%-5level) %clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} --- [%t] %clr(%-40.40logger{39}){cyan} : %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
