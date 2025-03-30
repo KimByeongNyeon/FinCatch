@@ -91,7 +91,7 @@ pipeline {
                           # 컨테이너 실행
                           docker run -d --name ${BACKEND_CONTAINER_NAME} --network fincatch \
                               -p 9097:9091 \
-                              -v /home/ubuntu/logs:/logs
+                              -v /home/ubuntu/logs:/logs \
                               -e TZ=Asia/Seoul \
                               -e JAVA_TOOL_OPTIONS="-Duser.timezone=Asia/Seoul" \
                               -e SPRING_PROFILES_ACTIVE=prod \
